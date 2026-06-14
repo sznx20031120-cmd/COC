@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CoC Safe V4</title>
+<title>CoC Stable</title>
 
 <style>
 body {
@@ -16,38 +16,27 @@ body {
 #top {
   padding:10px;
   background:#111826;
-  display:flex;
-  justify-content:space-between;
-}
-
-#wrap {
-  padding:10px;
 }
 
 #log {
-  height:55vh;
+  padding:10px;
+  height:60vh;
   overflow:auto;
   background:#0f1621;
-  padding:10px;
-  border-radius:10px;
 }
 
 button {
+  margin:5px;
   padding:8px;
-  margin:4px;
   background:#1d2a35;
   color:white;
   border:1px solid #2c3e50;
-  border-radius:6px;
 }
 
 input {
-  width:100%;
+  width:95%;
   padding:10px;
-  margin-top:10px;
-  background:#0f1621;
-  color:white;
-  border:1px solid #2c3e50;
+  margin:10px;
 }
 </style>
 </head>
@@ -55,215 +44,125 @@ input {
 <body>
 
 <div id="top">
-  <div>CoC Safe V4</div>
-  <div>
-    <button onclick="save()">存档</button>
-    <button onclick="load()">读档</button>
-  </div>
+  <b>CoC Stable Version</b>
 </div>
 
-<div id="wrap">
+<div id="log"></div>
 
-  <div id="log"></div>
+<input id="input" placeholder="输入行动..." />
+<button onclick="act()">行动</button>
 
-  <input id="input" placeholder="输入行动..." />
-  <button onclick="act()">行动</button>
-
-  <div id="choices"></div>
-
-</div>
+<div id="choices"></div>
 
 <script>
 
 /* =========================
-   🛡️ 安全初始化（防白屏核心）
+   🛡️ 永不白屏核心结构
 ========================= */
+
 let state = {
+  log: [],
   hp: 12,
-  san: 60,
-  log: []
-}
+  san: 60
+};
 
-/* 防御：确保log永远存在 */
-if (!Array.isArray(state.log)) {
-  state.log = []
-}
+const logBox = document.getElementById("log");
+const choiceBox = document.getElementById("choices");
+const inputBox = document.getElementById("input");
 
 /* =========================
-   UI安全获取
-========================= */
-const logBox = document.getElementById("log")
-const choiceBox = document.getElementById("choices")
-
-/* =========================
-   安全日志函数（防崩溃）
+   安全日志
 ========================= */
 function add(text) {
   try {
-    state.log.push(text)
-
-    const div = document.createElement("div")
-    div.innerText = text
+    state.log.push(text);
 
     if (logBox) {
-      logBox.appendChild(div)
-      logBox.scrollTop = logBox.scrollHeight
+      const d = document.createElement("div");
+      d.innerText = text;
+      logBox.appendChild(d);
+      logBox.scrollTop = logBox.scrollHeight;
     }
   } catch (e) {
-    console.log("log error:", e)
+    console.log("log error", e);
   }
 }
 
 /* =========================
-   骰子系统（安全版）
-========================= */
-function roll() {
-  return Math.floor(Math.random() * 100) + 1
-}
-
-/* =========================
-   AI（本地模拟，永不崩）
+   AI（本地稳定版）
 ========================= */
 function AI(action) {
+  if (!action) return "你什么也没做。";
 
-  if (!action) action = "无动作"
+  if (action.includes("门")) return "门后传来潮湿气味。";
+  if (action.includes("检查")) return "你看到模糊的血迹。";
 
-  if (action.includes("门")) {
-    return "你推开门，空气冰冷。"
-  }
-
-  if (action.includes("检查")) {
-    return "你检查四周，感觉被注视。"
-  }
-
-  return "你继续前进，走廊很安静。"
+  return "走廊安静得不自然。";
 }
 
 /* =========================
-   行动系统（防崩溃核心）
+   行动系统（防崩）
 ========================= */
 function act(choice) {
-
   try {
 
-    const input = document.getElementById("input")
-    const action = choice || (input ? input.value : "")
+    const action = choice || (inputBox ? inputBox.value : "");
 
-    add("你：" + action)
+    add("你：" + action);
 
-    const result = AI(action)
+    const result = AI(action);
 
-    add(result)
+    add(result);
 
-    renderChoices([
-      "继续前进",
-      "检查环境",
-      "打开门"
-    ])
+    renderChoices();
 
-    if (input) input.value = ""
-
-    saveAuto()
+    if (inputBox) inputBox.value = "";
 
   } catch (e) {
-    console.log("act error:", e)
+    console.log("act error", e);
+    add("系统异常，但游戏继续运行");
   }
 }
 
 /* =========================
    选项
 ========================= */
-function renderChoices(list) {
-
+function renderChoices() {
   try {
+    if (!choiceBox) return;
 
-    if (!choiceBox) return
+    choiceBox.innerHTML = "";
 
-    choiceBox.innerHTML = ""
-
-    list.forEach(c => {
-      const b = document.createElement("button")
-      b.innerText = c
-      b.onclick = () => act(c)
-      choiceBox.appendChild(b)
-    })
+    ["环顾四周", "检查墙壁", "打开门"].forEach(c => {
+      const b = document.createElement("button");
+      b.innerText = c;
+      b.onclick = () => act(c);
+      choiceBox.appendChild(b);
+    });
 
   } catch (e) {
-    console.log("choice error:", e)
+    console.log("choice error", e);
   }
 }
 
 /* =========================
-   存档系统（安全版）
+   启动保护
 ========================= */
-function save() {
+function init() {
   try {
-    localStorage.setItem("coc_safe", JSON.stringify(state))
-    alert("已存档")
+    add("你醒来，四周一片黑暗。");
+    renderChoices();
   } catch (e) {
-    alert("存档失败")
+    console.log("init error", e);
   }
 }
 
-function load() {
-  try {
-    const data = localStorage.getItem("coc_safe")
-    if (data) {
-      state = JSON.parse(data)
-    }
-    refresh()
-  } catch (e) {
-    console.log("load error:", e)
-  }
-}
+window.onload = init;
 
-function saveAuto() {
-  try {
-    localStorage.setItem("coc_safe", JSON.stringify(state))
-  } catch (e) {}
-}
+</script>
 
-/* =========================
-   重建UI（防空白）
-========================= */
-function refresh() {
-
-  try {
-
-    if (logBox) logBox.innerHTML = ""
-
-    if (state.log && state.log.length > 0) {
-      state.log.forEach(l => {
-        const d = document.createElement("div")
-        d.innerText = l
-        if (logBox) logBox.appendChild(d)
-      })
-    } else {
-      add("你醒来，四周一片黑暗。")
-    }
-
-    renderChoices([
-      "环顾四周",
-      "检查墙壁",
-      "向前走"
-    ])
-
-  } catch (e) {
-    console.log("refresh error:", e)
-  }
-}
-
-/* =========================
-   启动保护（关键）
-========================= */
-window.onload = function () {
-  try {
-    refresh()
-  } catch (e) {
-    console.log("init error:", e)
-  }
-}
-
+</body>
+</html>
 </script>
 
 </body>
