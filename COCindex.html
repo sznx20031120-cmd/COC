@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CoC Safe V4</title>
+
+<style>
+body {
+  margin:0;
+  font-family: system-ui;
+  background:#0b0f14;
+  color:#e6eef7;
+}
+
+#top {
+  padding:10px;
+  background:#111826;
+  display:flex;
+  justify-content:space-between;
+}
+
+#wrap {
+  padding:10px;
+}
+
+#log {
+  height:55vh;
+  overflow:auto;
+  background:#0f1621;
+  padding:10px;
+  border-radius:10px;
+}
+
+button {
+  padding:8px;
+  margin:4px;
+  background:#1d2a35;
+  color:white;
+  border:1px solid #2c3e50;
+  border-radius:6px;
+}
+
+input {
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  background:#0f1621;
+  color:white;
+  border:1px solid #2c3e50;
+}
+</style>
+</head>
+
+<body>
+
+<div id="top">
+  <div>CoC Safe V4</div>
+  <div>
+    <button onclick="save()">存档</button>
+    <button onclick="load()">读档</button>
+  </div>
+</div>
+
+<div id="wrap">
+
+  <div id="log"></div>
+
+  <input id="input" placeholder="输入行动..." />
+  <button onclick="act()">行动</button>
+
+  <div id="choices"></div>
+
+</div>
+
+<script>
+
+/* =========================
+   🛡️ 安全初始化（防白屏核心）
+========================= */
+let state = {
+  hp: 12,
+  san: 60,
+  log: []
+}
+
+/* 防御：确保log永远存在 */
+if (!Array.isArray(state.log)) {
+  state.log = []
+}
+
+/* =========================
+   UI安全获取
+========================= */
+const logBox = document.getElementById("log")
+const choiceBox = document.getElementById("choices")
+
+/* =========================
+   安全日志函数（防崩溃）
+========================= */
+function add(text) {
+  try {
+    state.log.push(text)
+
+    const div = document.createElement("div")
+    div.innerText = text
+
+    if (logBox) {
+      logBox.appendChild(div)
+      logBox.scrollTop = logBox.scrollHeight
+    }
+  } catch (e) {
+    console.log("log error:", e)
+  }
+}
+
+/* =========================
+   骰子系统（安全版）
+========================= */
+function roll() {
+  return Math.floor(Math.random() * 100) + 1
+}
+
+/* =========================
+   AI（本地模拟，永不崩）
+========================= */
+function AI(action) {
+
+  if (!action) action = "无动作"
+
+  if (action.includes("门")) {
+    return "你推开门，空气冰冷。"
+  }
+
+  if (action.includes("检查")) {
+    return "你检查四周，感觉被注视。"
+  }
+
+  return "你继续前进，走廊很安静。"
+}
+
+/* =========================
+   行动系统（防崩溃核心）
+========================= */
+function act(choice) {
+
+  try {
+
+    const input = document.getElementById("input")
+    const action = choice || (input ? input.value : "")
+
+    add("你：" + action)
+
+    const result = AI(action)
+
+    add(result)
+
+    renderChoices([
+      "继续前进",
+      "检查环境",
+      "打开门"
+    ])
+
+    if (input) input.value = ""
+
+    saveAuto()
+
+  } catch (e) {
+    console.log("act error:", e)
+  }
+}
+
+/* =========================
+   选项
+========================= */
+function renderChoices(list) {
+
+  try {
+
+    if (!choiceBox) return
+
+    choiceBox.innerHTML = ""
+
+    list.forEach(c => {
+      const b = document.createElement("button")
+      b.innerText = c
+      b.onclick = () => act(c)
+      choiceBox.appendChild(b)
+    })
+
+  } catch (e) {
+    console.log("choice error:", e)
+  }
+}
+
+/* =========================
+   存档系统（安全版）
+========================= */
+function save() {
+  try {
+    localStorage.setItem("coc_safe", JSON.stringify(state))
+    alert("已存档")
+  } catch (e) {
+    alert("存档失败")
+  }
+}
+
+function load() {
+  try {
+    const data = localStorage.getItem("coc_safe")
+    if (data) {
+      state = JSON.parse(data)
+    }
+    refresh()
+  } catch (e) {
+    console.log("load error:", e)
+  }
+}
+
+function saveAuto() {
+  try {
+    localStorage.setItem("coc_safe", JSON.stringify(state))
+  } catch (e) {}
+}
+
+/* =========================
+   重建UI（防空白）
+========================= */
+function refresh() {
+
+  try {
+
+    if (logBox) logBox.innerHTML = ""
+
+    if (state.log && state.log.length > 0) {
+      state.log.forEach(l => {
+        const d = document.createElement("div")
+        d.innerText = l
+        if (logBox) logBox.appendChild(d)
+      })
+    } else {
+      add("你醒来，四周一片黑暗。")
+    }
+
+    renderChoices([
+      "环顾四周",
+      "检查墙壁",
+      "向前走"
+    ])
+
+  } catch (e) {
+    console.log("refresh error:", e)
+  }
+}
+
+/* =========================
+   启动保护（关键）
+========================= */
+window.onload = function () {
+  try {
+    refresh()
+  } catch (e) {
+    console.log("init error:", e)
+  }
+}
+
+</script>
+
+</body>
+</html>
